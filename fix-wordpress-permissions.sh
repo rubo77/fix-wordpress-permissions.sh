@@ -6,53 +6,78 @@
 # Authors:
 # Michael Conigliaro <mike [at] conigliaro [dot] org>
 # Kyle Skrinak kyleskrinak
-# 
+# Ruben Barkow-Kuder
 
 WP_ROOT=$1  # <-- wordpress root directory
 WP_OWNER=$2 # <-- wordpress owner
 WP_GROUP=$3 # <-- wordpress group
-WWW_GROUP=$3 # <-- webserver group
-
+WWW_GROUP=$4 # <-- webserver group
 
 if [[ ${#1} -eq 0 ]]
 then
-  echo "No path arguments supplied. Bye."
+  WP_ROOT="/var/www/html/wordpress"
+  echo "No path arguments supplied. Using default path $WP_ROOT"
+fi
+
+if [[ ! -d "$WP_ROOT/wp-admin" ]]
+then
+  echo "$WP_ROOT is not a valid path. Bye."
   exit 1
 fi
 
-if [[ ! -d $1/wp-admin ]]
+if [[ ${#2} -eq 0 ]]
 then
-  echo "$1 is not a valid path. Bye."
-  exit 1
+  WP_OWNER="www-data"
+  echo "No wordpress owner supplied. Using default wordpress owner $WP_OWNER"
+fi
+
+if [[ ${#WP_GROUP} -eq 0 ]]
+then
+  WP_GROUP="www-data"
+  echo "No wordpress group supplied. Using default wordpress group $WP_GROUP"
+fi
+
+if [[ ${#4} -eq 0 ]]
+then
+  WWW_GROUP="$WP_GROUP"
+  echo "No webserver group supplied. Using wordpress group as webserver group (this is usually the expected scenario)"
 fi
 
 # Check the arguments before proceeding
 
 # If user, returns number. Not a user, no value
-ISUSER=$(id -u $2 2> /dev/null)
+ISUSER=$(id -u $WP_OWNER 2> /dev/null)
 # Is group in the group file? If so, returns line
-ISGRP=$(egrep -i $3 /etc/group)
+ISGRP=$(egrep -i $WP_GROUP /etc/group)
+WWW_ISGRP=$(egrep -i $WWW_GROUP /etc/group)
 
 if [[ $ISUSER -eq 0 ]]
   then
-    echo "$2 is not a user"
+    echo "$WP_OWNER is not a user"
     exit 1
 fi
 
 if [[ ${#ISGRP} -eq 0 ]]
   then
-    echo "$3 is not a group"
+    echo "$WP_GROUP is not a group"
+    exit 1
+fi
+
+if [[ ${#WWW_ISGRP} -eq 0 ]]
+  then
+    echo "$WWW_GROUP is not a group"
     exit 1
 fi
 
 echo "Proceeding with the following assumptions:"
 echo " 1. WP_ROOT: $WP_ROOT"
 echo " 2. WP_OWNER: $WP_OWNER"
-echo " 2. WP_GROUP: $WP_GROUP\n"
-echo "Look Good [y/n]?"
+echo " 2. WP_GROUP: $WP_GROUP"
+echo -e " 3. WWW_GROUP: $WWW_GROUP\n"
+echo "Looks good? [Y/n] "
 read yn
 case $yn in
-  [Yy]* ) echo "And we are off!";;
+  [YyZzJjOo]* ) echo "And we are off!";;
   [Nn]* ) return;;
   * ) echo "That's not yes or no." && return;;
 esac
