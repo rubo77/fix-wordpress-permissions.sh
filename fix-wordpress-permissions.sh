@@ -42,6 +42,18 @@ then
   exit 1
 fi
 
+echo "Proceeding with the following assumptions:"
+echo " 1. WP_ROOT: $WP_ROOT"
+echo " 2. WP_OWNER: $WP_OWNER"
+echo " 2. WP_GROUP: $WP_GROUP\n"
+echo "Look Good [y/n]?"
+read yn
+case $yn in
+  [Yy]* ) echo "And we are off!";;
+  [Nn]* ) return;;
+  * ) echo "That's not yes or no." && return;;
+esac
+
 # reset to safe defaults
 echo "Reseting permissions to safe defaults"
 
