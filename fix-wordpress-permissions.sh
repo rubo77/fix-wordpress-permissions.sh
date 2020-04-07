@@ -98,7 +98,6 @@ if [[ "$NO_CONFIRM" != "1" ]]; then
           * ) echo "Please answer yes or no.";;
       esac
   done
-  echo -e "And we are off!"
 fi
 
 set -x
