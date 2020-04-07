@@ -100,7 +100,7 @@ if [[ "$NO_CONFIRM" != "1" ]]; then
   done
 fi
 
-set -x
+PS4="# "; set -x
 : ::: Reseting permissions to safe defaults
 
 find ${WP_ROOT} -exec chown ${WP_OWNER}:${WP_GROUP} {} \;
