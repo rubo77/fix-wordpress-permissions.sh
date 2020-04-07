@@ -3,6 +3,8 @@
 # This script configures WordPress file permissions based on recommendations
 # from http://codex.wordpress.org/Hardening_WordPress#File_permissions
 #
+# Forked from https://gist.github.com/Adirael/3383404
+# 
 # Authors:
 # Michael Conigliaro <mike [at] conigliaro [dot] org>
 # Kyle Skrinak kyleskrinak
