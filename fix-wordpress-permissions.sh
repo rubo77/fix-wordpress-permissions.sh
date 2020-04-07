@@ -11,13 +11,19 @@
 # Ruben Barkow-Kuder
 set -e
 
+if [[ "$1" == "-y" ]]; then
+  NO_CONFIRM=1
+  shift
+fi
+
 WP_ROOT=$1  # <-- wordpress root directory
 WP_OWNER=$2 # <-- wordpress owner (default: www-data)
 WP_GROUP=$3 # <-- wordpress group (default: www-data)
 WWW_GROUP=$4 # <-- webserver group (default: www-data)
 
 if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-  echo -e "usage:\n  $0 [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]"
+  echo -e "usage:\n  $0 [-y] [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]"
+  echo "  -y dont ask for confirmation"
   exit
 fi
 
@@ -83,18 +89,20 @@ echo " 2. WP_OWNER: $WP_OWNER"
 echo " 2. WP_GROUP: $WP_GROUP"
 echo -e " 3. WWW_GROUP: $WWW_GROUP\n"
 
-while true; do
-    read -p "Looks good [Y/n]? " -n 1 -r -e yn
-    case "${yn:-Y}" in
-        [YyZzOoJj]* ) echo; break ;;
-        [Nn]* ) [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 ;; # handle exits from shell or function but don't exit interactive shell
-        * ) echo "Please answer yes or no.";;
-    esac
-done
-echo "And we are off!"
+if [[ "$NO_CONFIRM" != "1" ]]; then
+  while true; do
+      read -p "Looks good [Y/n]? " -n 1 -r -e yn
+      case "${yn:-Y}" in
+          [YyZzOoJj]* ) echo; break ;;
+          [Nn]* ) [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 ;; # handle exits from shell or function but don't exit interactive shell
+          * ) echo "Please answer yes or no.";;
+      esac
+  done
+  echo -e "And we are off!"
+fi
 
 # reset to safe defaults
-echo "Reseting permissions to safe defaults"
+echo -e "\n#### Reseting permissions to safe defaults"
 
 set -x
 find ${WP_ROOT} -exec chown ${WP_OWNER}:${WP_GROUP} {} \;
@@ -102,13 +110,13 @@ find ${WP_ROOT} -type d -exec chmod 755 {} \;
 find ${WP_ROOT} -type f -exec chmod 644 {} \;
 
 # allow wordpress to manage wp-config.php (but prevent world access)
-echo "Allowing wordpress to manage wp-config.php (but prevent world access)"
+echo -e "\n#### Allowing wordpress to manage wp-config.php (but prevent world access)"
 
 chgrp ${WWW_GROUP} ${WP_ROOT}/wp-config.php
 chmod 660 ${WP_ROOT}/wp-config.php
 
 # allow wordpress to manage wp-content
-echo "Allowing wordpress to manage wp-content"
+echo -e "\n#### Allowing wordpress to manage wp-content"
 
 find ${WP_ROOT}/wp-content -exec chgrp ${WWW_GROUP} {} \;
 find ${WP_ROOT}/wp-content -type d -exec chmod 775 {} \;
