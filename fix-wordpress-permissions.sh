@@ -18,6 +18,8 @@ DEFAULT_WP_GROUP="www-data"  # <-- wordpress group
 DEFAULT_WWW_GROUP="$DEFAULT_WP_GROUP" # <-- webserver group (usually the same as WP_GROUP)
 # optional if you don't want a confirmation:
 #NO_CONFIRM=1
+# optional be verbose on changing of user/groups:
+VERBOSE="-v"
 
 if [[ "$1" == "-y" ]]; then
   NO_CONFIRM=1
@@ -109,12 +111,12 @@ if [[ "$NO_CONFIRM" != "1" ]]; then
 fi
 
 PS4="# "; set -x
-: ::: Change Owner. Put this line in a cronjob if you plan to both upload by Wordpress, which is usually the user www-data and autodeploy by WP_OWNER regularly:
-find ${WP_ROOT} -exec chown ${WP_OWNER}:${WP_GROUP} {} \;
+: ::: Change owner and group. Put this line in a cronjob if you plan to both upload by Wordpress, which is usually the user www-data, and autodeploy by WP_OWNER regularly:
+find ${WP_ROOT} -not '(' -user  ${WP_OWNER} -a -group ${WP_GROUP} ')' -exec chown $VERBOSE ${WP_OWNER}:${WP_GROUP} {} \;
 
 : ::: Resetting permissions to safe defaults
-find ${WP_ROOT} -type d -exec chmod 755 {} \;
-find ${WP_ROOT} -type f -exec chmod 644 {} \;
+find ${WP_ROOT} -type d -not -perm 755 -exec chmod 755 {} \;
+find ${WP_ROOT} -type f -not -perm 644 -exec chmod 644 {} \;
 
 : ::: Allowing wordpress to manage wp-config.php, but prevent world access
 
@@ -123,6 +125,6 @@ chmod 660 ${WP_ROOT}/wp-config.php
 
 : ::: Allowing wordpress to manage wp-content
 
-find ${WP_ROOT}/wp-content -exec chgrp ${WWW_GROUP} {} \;
-find ${WP_ROOT}/wp-content -type d -exec chmod 775 {} \;
-find ${WP_ROOT}/wp-content -type f -exec chmod 664 {} \;
+find ${WP_ROOT}/wp-content -not -group ${WWW_GROUP} -exec chgrp $VERBOSE ${WWW_GROUP} {} \;
+find ${WP_ROOT}/wp-content -type d -not -perm 775 -exec chmod 775 {} \;
+find ${WP_ROOT}/wp-content -type f -not -perm 664 -exec chmod 664 {} \;
