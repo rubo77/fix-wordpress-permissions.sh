@@ -47,6 +47,11 @@ if [[ ! -d "$WP_ROOT/wp-admin" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$WP_ROOT/wp-config.php" ]]; then
+  echo "$WP_ROOT/wp-config.php is missing. Bye."
+  exit 1
+fi
+
 if [[ ${#WP_OWNER} -eq 0 ]]; then
   WP_OWNER="$DEFAULT_WP_OWNER"
   echo "No wordpress owner supplied. Using default wordpress owner $DEFAULT_WP_OWNER"
