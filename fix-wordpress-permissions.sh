@@ -7,8 +7,18 @@
 # 
 # Authors:
 # Michael Conigliaro <mike [at] conigliaro [dot] org>
-# Kyle Skrinak kyleskrinak
+# Kyle Skrinak
 # Ruben Barkow-Kuder
+
+#### SETTINGS
+# default values, if no arguments are given to the script call:
+DEFAULT_WP_ROOT="/var/www/html/wordpress" # <-- wordpress root directory
+DEFAULT_WP_OWNER="www-data"  # <-- wordpress owner
+DEFAULT_WP_GROUP="www-data"  # <-- wordpress group
+DEFAULT_WWW_GROUP="$DEFAULT_WP_GROUP" # <-- webserver group (usually the same as WP_GROUP)
+# optional if you don't want a confirmation:
+#NO_CONFIRM=1
+
 set -e
 
 if [[ "$1" == "-y" ]]; then
@@ -16,44 +26,39 @@ if [[ "$1" == "-y" ]]; then
   shift
 fi
 
-WP_ROOT=$1  # <-- wordpress root directory
-WP_OWNER=$2 # <-- wordpress owner (default: www-data)
-WP_GROUP=$3 # <-- wordpress group (default: www-data)
-WWW_GROUP=$4 # <-- webserver group (default: www-data)
-
 if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
   echo -e "usage:\n  $0 [-y] [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]"
   echo "  -y dont ask for confirmation"
   exit
 fi
 
-if [[ ${#1} -eq 0 ]]
-then
-  WP_ROOT="/var/www/html/wordpress"
-  echo "No path arguments supplied. Using default path $WP_ROOT"
+WP_ROOT=$1
+WP_OWNER=$2
+WP_GROUP=$3
+WWW_GROUP=$4
+
+if [[ ${#1} -eq 0 ]]; then
+  WP_ROOT="$DEFAULT_WP_ROOT"
+  echo "No path arguments supplied. Using default path $DEFAULT_WP_ROOT"
 fi
 
-if [[ ! -d "$WP_ROOT/wp-admin" ]]
-then
+if [[ ! -d "$WP_ROOT/wp-admin" ]]; then
   echo "$WP_ROOT is not a valid path. Bye."
   exit 1
 fi
 
-if [[ ${#2} -eq 0 ]]
-then
-  WP_OWNER="www-data"
-  echo "No wordpress owner supplied. Using default wordpress owner $WP_OWNER"
+if [[ ${#WP_OWNER} -eq 0 ]]; then
+  WP_OWNER="$DEFAULT_WP_OWNER"
+  echo "No wordpress owner supplied. Using default wordpress owner $DEFAULT_WP_OWNER"
 fi
 
-if [[ ${#WP_GROUP} -eq 0 ]]
-then
-  WP_GROUP="www-data"
-  echo "No wordpress group supplied. Using default wordpress group $WP_GROUP"
+if [[ ${#WP_GROUP} -eq 0 ]]; then
+  WP_GROUP="$DEFAULT_WP_GROUP"
+  echo "No wordpress group supplied. Using default wordpress group $DEFAULT_WP_GROUP"
 fi
 
-if [[ ${#4} -eq 0 ]]
-then
-  WWW_GROUP="$WP_GROUP"
+if [[ ${#WWW_GROUP} -eq 0 ]]; then
+  WWW_GROUP="$DEFAULT_WWW_GROUP"
   echo "No webserver group supplied. Using wordpress group as webserver group (this is usually the expected scenario)"
 fi
 
