@@ -7,11 +7,17 @@
 # Michael Conigliaro <mike [at] conigliaro [dot] org>
 # Kyle Skrinak kyleskrinak
 # Ruben Barkow-Kuder
+set -e
 
 WP_ROOT=$1  # <-- wordpress root directory
-WP_OWNER=$2 # <-- wordpress owner
-WP_GROUP=$3 # <-- wordpress group
-WWW_GROUP=$4 # <-- webserver group
+WP_OWNER=$2 # <-- wordpress owner (default: www-data)
+WP_GROUP=$3 # <-- wordpress group (default: www-data)
+WWW_GROUP=$4 # <-- webserver group (default: www-data)
+
+if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+  echo -e "usage:\n  $0 [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]"
+  exit
+fi
 
 if [[ ${#1} -eq 0 ]]
 then
@@ -74,17 +80,21 @@ echo " 1. WP_ROOT: $WP_ROOT"
 echo " 2. WP_OWNER: $WP_OWNER"
 echo " 2. WP_GROUP: $WP_GROUP"
 echo -e " 3. WWW_GROUP: $WWW_GROUP\n"
-echo "Looks good? [Y/n] "
-read yn
-case $yn in
-  [YyZzJjOo]* ) echo "And we are off!";;
-  [Nn]* ) return;;
-  * ) echo "That's not yes or no." && return;;
-esac
+
+while true; do
+    read -p "Looks good [Y/n]? " -n 1 -r -e yn
+    case "${yn:-Y}" in
+        [YyZzOoJj]* ) echo; break ;;
+        [Nn]* ) [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 ;; # handle exits from shell or function but don't exit interactive shell
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+echo "And we are off!"
 
 # reset to safe defaults
 echo "Reseting permissions to safe defaults"
 
+set -x
 find ${WP_ROOT} -exec chown ${WP_OWNER}:${WP_GROUP} {} \;
 find ${WP_ROOT} -type d -exec chmod 755 {} \;
 find ${WP_ROOT} -type f -exec chmod 644 {} \;
