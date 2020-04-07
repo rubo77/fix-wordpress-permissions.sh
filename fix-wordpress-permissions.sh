@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # This script configures WordPress file permissions based on recommendations
-# from http://codex.wordpress.org/Hardening_WordPress#File_permissions
+# from https://wordpress.org/support/article/hardening-wordpress/#file-permissions
 #
 # Forked from https://gist.github.com/Adirael/3383404
 # 
@@ -92,10 +92,10 @@ if [[ ${#WWW_ISGRP} -eq 0 ]]
 fi
 
 echo "Proceeding with the following assumptions:"
-echo " 1. WP_ROOT: $WP_ROOT"
-echo " 2. WP_OWNER: $WP_OWNER"
-echo " 2. WP_GROUP: $WP_GROUP"
-echo -e " 3. WWW_GROUP: $WWW_GROUP\n"
+echo "WP_ROOT=$WP_ROOT"
+echo "WP_OWNER=$WP_OWNER"
+echo "WP_GROUP=$WP_GROUP"
+echo -e "WWW_GROUP=$WWW_GROUP\n"
 
 if [[ "$NO_CONFIRM" != "1" ]]; then
   while true; do
@@ -109,9 +109,10 @@ if [[ "$NO_CONFIRM" != "1" ]]; then
 fi
 
 PS4="# "; set -x
-: ::: Reseting permissions to safe defaults
-
+: ::: Change Owner. Put this line in a cronjob if you plan to both upload by Wordpress, which is usually the user www-data and autodeploy by WP_OWNER regularly:
 find ${WP_ROOT} -exec chown ${WP_OWNER}:${WP_GROUP} {} \;
+
+: ::: Resetting permissions to safe defaults
 find ${WP_ROOT} -type d -exec chmod 755 {} \;
 find ${WP_ROOT} -type f -exec chmod 644 {} \;
 
