@@ -32,7 +32,7 @@ if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
   exit
 fi
 
-WP_ROOT=$1
+WP_ROOT=$(echo "$1"| sed 's/\/*$//g')
 WP_OWNER=$2
 WP_GROUP=$3
 WWW_GROUP=$4
