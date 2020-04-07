@@ -19,8 +19,6 @@ DEFAULT_WWW_GROUP="$DEFAULT_WP_GROUP" # <-- webserver group (usually the same as
 # optional if you don't want a confirmation:
 #NO_CONFIRM=1
 
-set -e
-
 if [[ "$1" == "-y" ]]; then
   NO_CONFIRM=1
   shift
