@@ -5,4 +5,5 @@ A script to configure WordPress file permissions based on recommendations from h
 ## usage:
 
 fix-wordpress-permissions.sh [-y] [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]
-  -y dont ask for confirmation
+
+    -y dont ask for confirmation
