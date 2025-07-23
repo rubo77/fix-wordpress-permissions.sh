@@ -3,6 +3,8 @@
 # This script configures WordPress file permissions based on recommendations
 # from https://wordpress.org/support/article/hardening-wordpress/#file-permissions
 #
+# Compatible with WordPress 6.8.2 and includes enhanced security options.
+#
 # Forked from https://gist.github.com/Adirael/3383404
 # 
 # Authors:
@@ -20,17 +22,36 @@ DEFAULT_WWW_GROUP="$DEFAULT_WP_GROUP" # <-- webserver group (usually the same as
 #NO_CONFIRM=1
 # optional be verbose on changing of user/groups:
 VERBOSE="-v"
+# Enhanced security mode - prevents other users from accessing files (770/660 instead of 775/664)
+ENHANCED_SECURITY=0
 
-if [[ "$1" == "-y" ]]; then
-  NO_CONFIRM=1
-  shift
-fi
-
-if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-  echo -e "usage:\n  $0 [-y] [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]"
-  echo "  -y dont ask for confirmation"
-  exit
-fi
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -y|--yes)
+      NO_CONFIRM=1
+      shift
+      ;;
+    -s|--secure)
+      ENHANCED_SECURITY=1
+      shift
+      ;;
+    -h|--help)
+      echo -e "usage:\n  $0 [-y] [-s] [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]"
+      echo "  -y, --yes     dont ask for confirmation"
+      echo "  -s, --secure  use enhanced security permissions (770/660 instead of 775/664)"
+      echo "                prevents other users from accessing WordPress files"
+      exit
+      ;;
+    -*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 WP_ROOT=$(echo "$1"| sed 's/\/*$//g')
 WP_OWNER=$2
@@ -97,7 +118,13 @@ echo "Proceeding with the following assumptions:"
 echo "WP_ROOT=$WP_ROOT"
 echo "WP_OWNER=$WP_OWNER"
 echo "WP_GROUP=$WP_GROUP"
-echo -e "WWW_GROUP=$WWW_GROUP\n"
+echo "WWW_GROUP=$WWW_GROUP"
+if [[ "$ENHANCED_SECURITY" == "1" ]]; then
+  echo "ENHANCED_SECURITY=enabled (770/660 permissions)"
+else
+  echo "ENHANCED_SECURITY=disabled (775/664 permissions)"
+fi
+echo
 
 if [[ "$NO_CONFIRM" != "1" ]]; then
   while true; do
@@ -115,8 +142,15 @@ PS4="# "; set -x
 find ${WP_ROOT} -not '(' -user  ${WP_OWNER} -a -group ${WP_GROUP} ')' -exec chown $VERBOSE ${WP_OWNER}:${WP_GROUP} {} \;
 
 : ::: Resetting permissions to safe defaults
-find ${WP_ROOT} -type d -not -perm 755 -exec chmod 755 {} \;
-find ${WP_ROOT} -type f -not -perm 644 -exec chmod 644 {} \;
+if [[ "$ENHANCED_SECURITY" == "1" ]]; then
+  # Enhanced security: 750 for directories, 640 for files (prevents other users access)
+  find ${WP_ROOT} -type d -not -perm 750 -exec chmod 750 {} \;
+  find ${WP_ROOT} -type f -not -perm 640 -exec chmod 640 {} \;
+else
+  # Standard permissions: 755 for directories, 644 for files
+  find ${WP_ROOT} -type d -not -perm 755 -exec chmod 755 {} \;
+  find ${WP_ROOT} -type f -not -perm 644 -exec chmod 644 {} \;
+fi
 
 : ::: Allowing wordpress to manage wp-config.php, but prevent world access
 
@@ -126,5 +160,12 @@ chmod 660 ${WP_ROOT}/wp-config.php
 : ::: Allowing wordpress to manage wp-content
 
 find ${WP_ROOT}/wp-content -not -group ${WWW_GROUP} -exec chgrp $VERBOSE ${WWW_GROUP} {} \;
-find ${WP_ROOT}/wp-content -type d -not -perm 775 -exec chmod 775 {} \;
-find ${WP_ROOT}/wp-content -type f -not -perm 664 -exec chmod 664 {} \;
+if [[ "$ENHANCED_SECURITY" == "1" ]]; then
+  # Enhanced security: 770 for directories, 660 for files (prevents other users access)
+  find ${WP_ROOT}/wp-content -type d -not -perm 770 -exec chmod 770 {} \;
+  find ${WP_ROOT}/wp-content -type f -not -perm 660 -exec chmod 660 {} \;
+else
+  # Standard permissions: 775 for directories, 664 for files
+  find ${WP_ROOT}/wp-content -type d -not -perm 775 -exec chmod 775 {} \;
+  find ${WP_ROOT}/wp-content -type f -not -perm 664 -exec chmod 664 {} \;
+fi
