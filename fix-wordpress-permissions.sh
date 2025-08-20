@@ -41,6 +41,15 @@ while [[ $# -gt 0 ]]; do
       echo "  -y, --yes     dont ask for confirmation"
       echo "  -s, --secure  use enhanced security permissions (770/660 instead of 775/664)"
       echo "                prevents other users from accessing WordPress files"
+      echo ""
+      echo "Examples:"
+      echo "  $0                                    # Use default settings"
+      echo "  $0 /var/www/mysite                   # Custom WordPress directory"
+      echo "  $0 /var/www/html wpuser              # Custom directory and owner"
+      echo "  $0 /var/www/html wpuser wpgroup apache # Full specification"
+      echo "  $0 -s /var/www/html                  # Enhanced security mode"
+      echo "  $0 -y /var/www/html                  # Skip confirmation"
+      echo "  $0 -y -s /var/www/html wpuser wpgroup apache # Combined options"
       exit
       ;;
     -*)
