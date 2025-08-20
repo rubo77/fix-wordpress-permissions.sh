@@ -12,6 +12,50 @@ Compatible with WordPress 6.8.2 and includes enhanced security options.
       -s, --secure  use enhanced security permissions (770/660 instead of 775/664)
                     prevents other users from accessing WordPress files
 
+## Examples:
+
+### Basic usage with default settings
+```bash
+# Uses default path /var/www/html/wordpress and www-data user/group
+bash fix-wordpress-permissions.sh
+```
+
+### Specify custom WordPress directory
+```bash
+# Fix permissions for WordPress in /var/www/mysite
+bash fix-wordpress-permissions.sh /var/www/mysite
+```
+
+### Specify custom WordPress directory and owner
+```bash
+# Custom path with specific owner, using default groups
+bash fix-wordpress-permissions.sh /home/user/wordpress wpuser
+```
+
+### Full specification with custom path, owner, and groups
+```bash
+# Complete specification of all parameters
+bash fix-wordpress-permissions.sh /var/www/html wpuser wpgroup apache
+```
+
+### Enhanced security mode
+```bash
+# Use enhanced security permissions (770/660 instead of 775/664)
+bash fix-wordpress-permissions.sh -s /var/www/html
+```
+
+### Skip confirmation prompt
+```bash
+# Run without asking for confirmation (useful for scripts/automation)
+bash fix-wordpress-permissions.sh -y /var/www/html
+```
+
+### Combined options
+```bash
+# Enhanced security mode without confirmation
+bash fix-wordpress-permissions.sh -y -s /var/www/html wpuser wpgroup apache
+```
+
 ## Permission Modes:
 
 ### Standard Mode (default)
