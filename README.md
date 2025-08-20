@@ -6,11 +6,10 @@ Compatible with WordPress 6.8.2 and includes enhanced security options.
 
 ## usage:
 
-    bash fix-wordpress-permissions.sh [-y] [-s] [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]
-
-      -y, --yes     dont ask for confirmation
-      -s, --secure  use enhanced security permissions (770/660 instead of 775/664)
-                    prevents other users from accessing WordPress files
+    ./fix-wordpress-permissions.sh [-y] [-s] [wordpress root directory] [wordpress owner] [wordpress group] [webserver group]
+    -y, --yes     dont ask for confirmation
+    -s, --secure  use enhanced security permissions (770/660 instead of 775/664)
+                  prevents other users from accessing WordPress files
 
 ## Permission Modes:
 
